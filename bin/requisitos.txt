@@ -1,0 +1,1 @@
+Tener instalado MinGW y registrado en PATH

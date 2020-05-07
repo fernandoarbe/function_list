@@ -33,6 +33,7 @@
 
 using namespace std;
 
+
 struct StringFx {
     string replaceStr(string myString, const string& strFind, const string& strReplaceWith) {
         size_t start_pos = 0;
@@ -40,6 +41,14 @@ struct StringFx {
         while ((start_pos = myString.find(strFind, start_pos)) != string::npos) {
             myString.replace(start_pos, strFind_lenght, strReplaceWith);
             start_pos += strFind_lenght;
+        }
+        return myString;
+    }
+    string toLower2(string myString) {
+        short int nPosition;
+
+        for (nPosition = 0; nPosition < myString.length(); nPosition++) {
+            myString[nPosition] = tolower(myString[nPosition] );
         }
         return myString;
     }
@@ -57,6 +66,7 @@ struct StringFx {
         myString.erase(0, myString.find_last_not_of(chars));
         return myString;
     }
+
     string trim(string myString, const string& chars = "\t\n\v\f\r "){
         return ltrim(rtrim(myString, chars), chars);
     }
@@ -85,6 +95,11 @@ struct StringFx {
         unsigned short int nCount2;
         unsigned short int nCount3;
         StringFx stringFx;
+        nCount1 = stringFx.count_chars(myString, '}');
+
+        if (nCount1 > 0) {
+            return false;
+        }
         nCount1 = stringFx.count_chars(myString, '(');
         if (stringFx.isFunctionDeclaration2(myString) == false) {
             return false;
@@ -110,10 +125,10 @@ struct StringFx {
     }
     bool isFunctionDeclaration2 (string myString) {
         StringFx stringFx;
-        string reservedList[] = {"switch", "if", "for"};
+        string reservedList[] = {"switch", "if", "for", "else", "}", "while"};
         string reservedWord;
         myString = stringFx.firstWord(myString);
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 6; i++) {
             reservedWord = reservedList[i];
             if (reservedWord.find(myString) != string::npos){
                 return false;
@@ -122,13 +137,29 @@ struct StringFx {
         //cout << myString;
         return true;
     }
+    bool has_includeMe_word (string myString) {
+        StringFx stringFx;
+        string includeMe_words[] = {"//watch", "/*watch"};
+        string includeMe_word;
+        //myString = stringFx.firstWord(myString);
+        myString = stringFx.toLower2(myString);
+        for (short int i=0; i < 2; i++){
+            includeMe_word = includeMe_words[i];
+            if (myString.find(includeMe_word) != string::npos) {
+                return true;
+            }
+        }
+    }
 };
 
 int main()
 {
     string strFilePath;
     string strFilePath2;
+    string strFileName;
     string strCurrentLine;
+    string strConsoleTitle;
+
     string texto1;
     short int nLastFunctionLine1;
     short int nLastFunctionLine2;
@@ -138,10 +169,15 @@ int main()
     unsigned short int nLinea = 0;
     StringFx stringFx;
 
-
+    texto1 = "HOLA MUNdito";
+    cout << stringFx.toLower2(texto1) << endl;
     cout << "Ingrese la ruta del archivo a analizar: ";
     cin >> strFilePath;
     cout << endl;
+    strFileName = strFilePath;
+    strFileName = strFileName .erase(0, strFileName.find_last_of("\\") + 1 );
+    strConsoleTitle = "functions of " + strFileName;
+    SetConsoleTitle(strConsoleTitle.c_str());
     nLastFunctionLine1 = 0;
     nLastFunctionLine2 = 10000;
     nLastFunctionLine3 = 0;
@@ -164,7 +200,8 @@ int main()
         while (getline (srcFile, strCurrentLine)){
             strCurrentLine = stringFx.ltrim(strCurrentLine);
             nLinea ++;
-            if (stringFx.isFunctionDeclaration(strCurrentLine) == true) {
+            if ((stringFx.isFunctionDeclaration(strCurrentLine) == true) ||
+                (stringFx.has_includeMe_word(strCurrentLine) == true)){
                 nLastFunctionLine3 = nLinea;
                 if (nLastFunctionLine1 != nLastFunctionLine2) {
                     cout << stringFx.lpad(to_string(nLinea), 4) << ": " << strCurrentLine << endl;
@@ -175,7 +212,7 @@ int main()
         nLastFunctionLine1 = nLastFunctionLine2;
         nLastFunctionLine2 = nLastFunctionLine3;
         srcFile.close();
-        Sleep(4000);
+        Sleep(3000);
     }
 
     return 0;
